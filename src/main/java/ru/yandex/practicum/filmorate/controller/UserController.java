@@ -13,7 +13,9 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
     private final Map<Integer, Users> userMap = new HashMap<>();
+
     LocalDate localDate;
+
     @GetMapping
     public Collection<Users> getUser() {
         return userMap.values();
