@@ -44,7 +44,6 @@ class FilmorateApplicationTests {
 		Users users = Users.builder().build();
 		assertEquals(4, validator.validate(users).size()); // проверяем, что есть две ошибки валидации
 	}
-	
 	@Test
 	public void testInvalidUser() {
 		Users users = Users.builder()
