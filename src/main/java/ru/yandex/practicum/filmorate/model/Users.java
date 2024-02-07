@@ -5,24 +5,19 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
-/**
- * Film.
- */
 @Data
 @Builder
-public class Film {
+public class Users {
     private int id;
-    @NotBlank
     @NotNull
+    @NotBlank
+    private String email;
+    @NotNull
+    @NotBlank
+    private String login;
     private String name;
-    @Size(max = 200)
-    private String description;
-    private LocalDate releaseDate;
-    @Positive
-    private int duration;
+    private LocalDate birthday;
 }
+
