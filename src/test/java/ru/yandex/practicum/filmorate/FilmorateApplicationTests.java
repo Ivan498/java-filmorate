@@ -38,11 +38,13 @@ class FilmorateApplicationTests {
 				.build();
 		assertEquals(3, validator.validate(film).size()); // проверяем, что есть четыре ошибки валидации
 	}
+
 	@Test
 	public void testEmptyUser() {
 		Users users = Users.builder().build();
 		assertEquals(4, validator.validate(users).size()); // проверяем, что есть две ошибки валидации
 	}
+	
 	@Test
 	public void testInvalidUser() {
 		Users users = Users.builder()
