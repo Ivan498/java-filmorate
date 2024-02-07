@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +45,21 @@ class FilmorateApplicationTests {
 		Users users = Users.builder().build();
 		assertEquals(4, validator.validate(users).size()); // проверяем, что есть две ошибки валидации
 	}
+	
+	@Test
+	public void testEqualsLoginName() {
+		Users users = Users.builder()
+				.id(1)
+				.email("")
+				.login("Karavaev")
+				.name("")
+				.birthday(LocalDate.of(2004, 1, 20))
+				.build();
+		UserController userController = new UserController();
+		userController.createUser(users);
+		assertEquals("Karavaev",users.getName());
+	}
+	
 	@Test
 	public void testInvalidUser() {
 		Users users = Users.builder()
