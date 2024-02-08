@@ -45,9 +45,11 @@ class FilmorateApplicationTests {
 		Users users = Users.builder().build();
 		assertEquals(4, validator.validate(users).size()); // проверяем, что есть две ошибки валидации
 	}
-	void METHOD_DEF (){
+	
+	void methodDef () {
 		// Тело метода
 	}
+
 	@Test
 	public void testEqualsLoginName() {
 		Users users = Users.builder()
@@ -61,6 +63,7 @@ class FilmorateApplicationTests {
 		userController.createUser(users);
 		assertEquals("Karavaev",users.getName());
 	}
+
 	@Test
 	public void testInvalidUser() {
 		Users users = Users.builder()
