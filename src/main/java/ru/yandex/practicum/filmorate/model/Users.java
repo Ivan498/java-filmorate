@@ -8,8 +8,7 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class Users {
-    @NotNull
-    private int id;
+    private Integer id;
     @NotNull
     @NotBlank
     private String email;
