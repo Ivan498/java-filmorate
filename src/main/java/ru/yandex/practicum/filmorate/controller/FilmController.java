@@ -3,7 +3,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Users;
+
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -20,45 +23,54 @@ public class FilmController {
 
     LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
 
+    public void validateUserFields(Film film) {
+        if (!film.getReleaseDate().isAfter(earliestAllowedDate)) {
+            log.debug("Не пройдена валидация email: {}", film.getReleaseDate());
+
+            throw new ValidationException(HttpStatus.BAD_REQUEST,
+                    "Параметр ReleaseDate не должна быть менбше даты 1895.12.28");
+        }
+    }
+
     @GetMapping
     public Collection<Film> getFilm() {
+        log.info("Гет всех фильмов");
         return filmMap.values();
     }
 
     @PostMapping
-    public ResponseEntity<?> createFilm(@Valid @RequestBody Film film) {
-        if (film.getReleaseDate().isAfter(earliestAllowedDate)) {
+    public Film createFilm(@Valid @RequestBody Film film) {
+        validateUserFields(film);
             if (film.getId() == null || film.getId() == 0) {
                 idCount++;
-                int id = idCount;
-                film.setId(id);
+                film.setId(idCount);
             }
             filmMap.put(film.getId(), film);
             log.info("Фильм добавлен");
-            return new ResponseEntity<>(film, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Ошибка", HttpStatus.BAD_REQUEST);
-        }
+            return film;
     }
 
     @PutMapping
-    public ResponseEntity<?> updateFilm(@Valid @RequestBody Film film) {
-        if (film.getReleaseDate().isAfter(earliestAllowedDate)) {
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        log.debug("Получен запрос PUT /users.");
+        log.debug("Попытка добавить пользователя {}.", film);
+
+        validateUserFields(film);
+
             for (Map.Entry<Integer, Film> entry : filmMap.entrySet()) {
                 if (entry.getValue().getId() == film.getId()) {
                     if (film.getId() == null || film.getId() == 0) {
-                        idCount++;
-                        int id = idCount;
-                        film.setId(id);
                     }
                     filmMap.put(film.getId(), film);
                     filmMap.replace(entry.getKey(), film);
                     log.info("Фильм обновлен");
-                    return new ResponseEntity<>(film, HttpStatus.OK);
 
                 }
+                else {
+                    throw new ValidationException(HttpStatus.NOT_FOUND,
+                            "Такого id нет в фильмах");
+                }
             }
+            return film;
         }
-        return new ResponseEntity<>("Ошибка", HttpStatus.BAD_REQUEST);
     }
-}
