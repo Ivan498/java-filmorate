@@ -3,7 +3,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Users;
+import ru.yandex.practicum.filmorate.model.User;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -14,10 +14,10 @@ import java.util.Map;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Integer, Users> userMap = new HashMap<>();
+    private final Map<Integer, User> userMap = new HashMap<>();
     private int userIdCounter = 0;
 
-    private void validateUserFields(Users user) {
+    private void validateUserFields(User user) {
         String email = user.getEmail();
         String login = user.getLogin();
         LocalDate birthday = user.getBirthday();
@@ -44,21 +44,21 @@ public class UserController {
         }
     }
 
-    private Users replaceVoidNameByLogin(Users users) {
-        if (users.getName().isEmpty() && users.getName() == null) {
-            users.setName(users.getLogin());
+    private User replaceVoidNameByLogin(User user) {
+        if (user.getName().isEmpty() && user.getName() == null) {
+            user.setName(user.getLogin());
         }
-        return users;
+        return user;
     }
 
     @GetMapping
-    public Collection<Users> getUser() {
+    public Collection<User> getUser() {
         log.info("Гет всех юзеров");
         return userMap.values();
     }
 
     @PostMapping
-    public Users createUser(@RequestBody Users user) {
+    public User createUser(@RequestBody User user) {
         log.debug("Получен запрос POST /users.");
         log.debug("Попытка добавить пользователя {}.", user);
 
@@ -81,15 +81,15 @@ public class UserController {
     }
 
     @PutMapping
-    public Users updateUser(@Valid @RequestBody Users user) {
+    public User updateUser(@Valid @RequestBody User user) {
         log.debug("Получен запрос PUT /users.");
         log.debug("Попытка добавить пользователя {}.", user);
 
         validateUserFields(user);
 
-        Users userReplaced = replaceVoidNameByLogin(user);
+        User userReplaced = replaceVoidNameByLogin(user);
 
-            for (Map.Entry<Integer, Users> entry : userMap.entrySet()) {
+            for (Map.Entry<Integer, User> entry : userMap.entrySet()) {
                 if (entry.getValue().getId() == user.getId()) {
                     if (user.getId() == null || user.getId() == 0) {
                         userIdCounter++;

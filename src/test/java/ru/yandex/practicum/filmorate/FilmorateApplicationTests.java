@@ -1,7 +1,10 @@
 package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import javax.validation.Validation;
@@ -23,18 +26,10 @@ class FilmorateApplicationTests {
 		Film film = Film.builder()
 				.id(1)
 				.name("")
-				.description("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus quis duiвыапвыаыпвыапвыа" +
-						"авапвывапролрпавывапролропаваыаыпавпвпвпававапвпвпвпвапвапваsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"пвапвавываыЭdsfssssssssdassssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
-						"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+				.description("а".repeat(201))
 				.releaseDate(LocalDate.of(1800, 1, 1))
 				.duration(-10)
 				.build();
-		assertEquals(3, validator.validate(film).size()); // проверяем, что есть четыре ошибки валидации
+		assertEquals(3, validator.validate(film).size());
 	}
 }
