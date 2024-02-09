@@ -74,7 +74,9 @@ public class UserController {
         }
 
         userMap.put(user.getId(), user);
+
         log.info("Фильм добавлен");
+
         return user;
     }
 
@@ -96,8 +98,7 @@ public class UserController {
                     userMap.put(user.getId(), user);
                     userMap.replace(entry.getKey(), user);
                     log.info("Фильм добавлен");
-                }
-                else {
+                } else {
                     throw new ValidationException(HttpStatus.NOT_FOUND,
                             "Такого id нет в User");
                 }

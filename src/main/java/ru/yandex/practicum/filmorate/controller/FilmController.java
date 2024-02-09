@@ -1,12 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-
-
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -41,13 +38,16 @@ public class FilmController {
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
         validateUserFields(film);
-            if (film.getId() == null || film.getId() == 0) {
-                idCount++;
-                film.setId(idCount);
-            }
-            filmMap.put(film.getId(), film);
-            log.info("Фильм добавлен");
-            return film;
+
+        if (film.getId() == null || film.getId() == 0) {
+            idCount++;
+            film.setId(idCount);
+        }
+
+        filmMap.put(film.getId(), film);
+        log.info("Фильм добавлен");
+
+        return film;
     }
 
     @PutMapping
@@ -62,8 +62,7 @@ public class FilmController {
                     filmMap.put(film.getId(), film);
                     filmMap.replace(entry.getKey(), film);
                     log.info("Фильм обновлен");
-                }
-                else {
+                } else {
                     throw new ValidationException(HttpStatus.NOT_FOUND,
                             "Такого id нет в фильмах");
                 }
