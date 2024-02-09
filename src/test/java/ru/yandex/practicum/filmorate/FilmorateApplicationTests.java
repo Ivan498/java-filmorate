@@ -75,4 +75,5 @@ class FilmorateApplicationTests {
 				.build();
 		assertEquals(2, validator.validate(users).size());
 	}
+
 }
