@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Users;
@@ -17,7 +16,7 @@ import java.util.Map;
 public class UserController {
     private final Map<Integer, Users> userMap = new HashMap<>();
     private int userIdCounter = 0;
-    LocalDate localDate;
+
     private void validateUserFields(Users user) {
         String email = user.getEmail();
         String login = user.getLogin();

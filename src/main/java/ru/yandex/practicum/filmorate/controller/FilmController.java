@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Users;
+
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -59,12 +59,9 @@ public class FilmController {
 
             for (Map.Entry<Integer, Film> entry : filmMap.entrySet()) {
                 if (entry.getValue().getId() == film.getId()) {
-                    if (film.getId() == null || film.getId() == 0) {
-                    }
                     filmMap.put(film.getId(), film);
                     filmMap.replace(entry.getKey(), film);
                     log.info("Фильм обновлен");
-
                 }
                 else {
                     throw new ValidationException(HttpStatus.NOT_FOUND,
