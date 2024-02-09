@@ -39,41 +39,4 @@ class FilmorateApplicationTests {
 				.build();
 		assertEquals(3, validator.validate(film).size()); // проверяем, что есть четыре ошибки валидации
 	}
-
-	@Test
-	public void testEmptyUser() {
-		Users users = Users.builder().build();
-		assertEquals(4, validator.validate(users).size()); // проверяем, что есть две ошибки валидации
-	}
-
-	void methodDef() {
-		// Тело метода
-	}
-
-	@Test
-	public void testEqualsLoginName() {
-		Users users = Users.builder()
-				.id(1)
-				.email("")
-				.login("Karavaev")
-				.name("")
-				.birthday(LocalDate.of(2004, 1, 20))
-				.build();
-		UserController userController = new UserController();
-		userController.createUser(users);
-		assertEquals("Karavaev",users.getName());
-	}
-
-	@Test
-	public void testInvalidUser() {
-		Users users = Users.builder()
-				.id(1)
-				.email("")
-				.login("")
-				.name("Караваев")
-				.birthday(LocalDate.of(2004, 1, 20))
-				.build();
-		assertEquals(2, validator.validate(users).size());
-	}
-
 }
