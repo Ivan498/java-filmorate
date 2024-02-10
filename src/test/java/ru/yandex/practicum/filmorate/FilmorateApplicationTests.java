@@ -18,7 +18,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на не проверку пройден из-за даты")
-	public void UserDateInValidTest() {
+	public void userDateInValidTest() {
 		User user = User.builder()
 				.id(1)
 				.email("mail@yandex.ru")
@@ -32,7 +32,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на проверку пройден, но поменялось name на login")
-	public void UserNameLoginValidTest() {
+	public void userNameLoginValidTest() {
 		User user = User.builder()
 				.id(1)
 				.email("mail@yandex.ru")
@@ -47,7 +47,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на проверку пройден, но поменялось name на login")
-	public void UserMainInValidTest() {
+	public void userMainInValidTest() {
 		User user = User.builder()
 				.id(1)
 				.email("mailyandex.ru")
@@ -61,7 +61,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на проверку пройден, но мы вводим пользователя без id")
-	public void UserWithoutIdTest() {
+	public void userWithoutIdTest() {
 		User user = User.builder()
 				.email("mail@yandex.ru")
 				.login("doloreUpdate")
@@ -74,7 +74,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на проверку не пройден из-за даты")
-	public void FilmDateInValidTest() {
+	public void filmDateInValidTest() {
 		Film film = Film.builder()
 				.id(1)
 				.name("Фильм")
@@ -88,7 +88,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на проверку не пройден из-за продолжительности фильма")
-	public void FilmDurationInValidTest() {
+	public void filmDurationInValidTest() {
 		Film film = Film.builder()
 				.id(1)
 				.name("Фильм")
@@ -102,7 +102,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	@DisplayName(value = "Запрос на проверку пройден, но мы вводим пользователя без id")
-	public void FilmWithoutIdTest() {
+	public void filmWithoutIdTest() {
 		Film film = Film.builder()
 				.name("Фильм")
 				.description("Описание")
