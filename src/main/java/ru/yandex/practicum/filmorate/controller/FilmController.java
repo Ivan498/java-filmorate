@@ -21,7 +21,7 @@ public class FilmController {
     LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
 
     public void validateUserFields(Film film) {
-        if (!film.getReleaseDate().isAfter(earliestAllowedDate)) {
+        if (film.getReleaseDate().isBefore(earliestAllowedDate)) {
             log.debug("Не пройдена валидация email: {}", film.getReleaseDate());
 
             throw new ValidationException(HttpStatus.BAD_REQUEST,
@@ -37,6 +37,9 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
+        log.info("Получен запрос POST /film.");
+        log.info("Попытка добавить пользователя {}.", film);
+
         validateUserFields(film);
 
         if (film.getId() == null || film.getId() == 0) {
@@ -52,21 +55,18 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        log.debug("Получен запрос PUT /users.");
-        log.debug("Попытка добавить пользователя {}.", film);
+        log.info("Получен запрос PUT /users.");
+        log.info("Попытка добавить пользователя {}.", film);
 
         validateUserFields(film);
 
-            for (Map.Entry<Integer, Film> entry : filmMap.entrySet()) {
-                if (entry.getValue().getId() == film.getId()) {
-                    filmMap.put(film.getId(), film);
-                    filmMap.replace(entry.getKey(), film);
-                    log.info("Фильм обновлен");
-                } else {
-                    throw new ValidationException(HttpStatus.NOT_FOUND,
-                            "Такого id нет в фильмах");
-                }
-            }
-            return film;
+        if (filmMap.containsKey(film.getId())) {
+            filmMap.put(film.getId(), film);
+            log.info("Film обновлен");
+        } else {
+            throw new ValidationException(HttpStatus.NOT_FOUND, "Такого id нет в фильмах");
+        }
+
+        return film;
         }
     }

@@ -62,15 +62,15 @@ public class UserController {
         log.debug("Получен запрос POST /users.");
         log.debug("Попытка добавить пользователя {}.", user);
 
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
+
         validateUserFields(user);
 
         if (user.getId() == null || user.getId() == 0) {
             userIdCounter++;
             user.setId(userIdCounter);
-        }
-
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
         }
 
         userMap.put(user.getId(), user);
@@ -85,24 +85,25 @@ public class UserController {
         log.debug("Получен запрос PUT /users.");
         log.debug("Попытка добавить пользователя {}.", user);
 
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
+
         validateUserFields(user);
 
-        User userReplaced = replaceVoidNameByLogin(user);
-
-            for (Map.Entry<Integer, User> entry : userMap.entrySet()) {
-                if (entry.getValue().getId() == user.getId()) {
-                    if (user.getId() == null || user.getId() == 0) {
-                        userIdCounter++;
-                        user.setId(userIdCounter);
-                    }
-                    userMap.put(user.getId(), user);
-                    userMap.replace(entry.getKey(), user);
-                    log.info("Фильм добавлен");
-                } else {
-                    throw new ValidationException(HttpStatus.NOT_FOUND,
-                            "Такого id нет в User");
+            if (userMap.containsKey(user.getId())) {
+                if (user.getId() == null || user.getId() == 0) {
+                    userIdCounter++;
+                    user.setId(userIdCounter);
                 }
+                userMap.replace(user.getId() , user);
+                log.info("User обновлен");
+            } else {
+                throw new ValidationException(HttpStatus.NOT_FOUND,
+                        "Такого id нет в User");
             }
-        return user;
+
+            return user;
+        }
+
     }
-}
