@@ -96,7 +96,7 @@ public class UserController {
                     userIdCounter++;
                     user.setId(userIdCounter);
                 }
-                userMap.replace(user.getId() , user);
+                userMap.replace(user.getId(), user);
                 log.info("User обновлен");
             } else {
                 throw new ValidationException(HttpStatus.NOT_FOUND,
