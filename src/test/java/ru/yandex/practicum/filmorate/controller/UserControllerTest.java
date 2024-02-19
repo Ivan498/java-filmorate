@@ -22,7 +22,7 @@ public class UserControllerTest {
     @DisplayName(value = "Запрос на проверку пройден")
     public void createUserTestValid() {
         User user = User.builder()
-                .id(1l)
+                .id(1L)
                 .email("mail@yandex.ru")
                 .login("doloreUpdate")
                 .name("est adipisicing")
@@ -36,7 +36,7 @@ public class UserControllerTest {
     @DisplayName(value = "Запрос на проверку не пройден")
     public void createUserTestInValid() {
         User user = User.builder()
-                .id(1l)
+                .id(1L)
                 .email("vankar28@")
                 .login("Karavaev")
                 .name("vanya28")
