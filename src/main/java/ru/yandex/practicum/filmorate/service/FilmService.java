@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FilmService {
     FilmStorage filmStorage;
@@ -34,6 +36,7 @@ public class FilmService {
             film.setLike(likes);
 
             filmStorage.saveFilm(film);
+            log.info("Добавили лайк на фильм по id " + id);
             return film;
         }
 
@@ -51,7 +54,7 @@ public class FilmService {
             }
             likes.remove(user.getId());
             film.setLike(likes);
-
+            log.info("Удалили лайк на фильм по id " + id);
             filmStorage.saveFilm(film);
         }
     }
@@ -64,6 +67,7 @@ public class FilmService {
                 .sorted(Comparator.comparingInt(film -> ((Film) film).getLike().size()).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
+        log.info("Показали популярные фильмы");
         return popularFilms;
     }
 }

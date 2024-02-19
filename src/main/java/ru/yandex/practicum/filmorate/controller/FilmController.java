@@ -65,6 +65,7 @@ public class FilmController {
 
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Integer id) {
+        log.info("Получен запрос GET /films/{id}.");
         return filmStorage.findByIdFilm(id);
     }
 
@@ -76,12 +77,13 @@ public class FilmController {
 
     @DeleteMapping("{id}/like/{userId}")
     public void deleteFilmLike(@PathVariable Integer id, @PathVariable Long userId) {
-        log.info("Получен запрос DELETE /{id}/like/{userId}.");
+        log.info("Получен запрос DELETE /films/{id}/like/{userId}.");
         filmService.deleteFilmLike(id, userId);
     }
 
     @GetMapping("/popular")
     public Collection<Film> getPopularListFilms(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
+        log.info("Получен запрос GET /films/popular?count={count}.");
         return filmService.getPopularFilms(count);
     }
 }
