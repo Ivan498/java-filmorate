@@ -20,7 +20,7 @@ class FilmorateApplicationTests {
 	@DisplayName(value = "Запрос на не проверку пройден из-за даты")
 	public void userDateInValidTest() {
 		User user = User.builder()
-				.id(1)
+				.id(1l)
 				.email("mail@yandex.ru")
 				.login("doloreUpdate")
 				.name("est adipisicing")
@@ -34,7 +34,7 @@ class FilmorateApplicationTests {
 	@DisplayName(value = "Запрос на проверку пройден, но поменялось name на login")
 	public void userNameLoginValidTest() {
 		User user = User.builder()
-				.id(1)
+				.id(1l)
 				.email("mail@yandex.ru")
 				.login("doloreUpdate")
 				.name("")
@@ -49,7 +49,7 @@ class FilmorateApplicationTests {
 	@DisplayName(value = "Запрос на проверку пройден, но поменялось name на login")
 	public void userMainInValidTest() {
 		User user = User.builder()
-				.id(1)
+				.id(1l)
 				.email("mailyandex.ru")
 				.login("doloreUpdate")
 				.name("Karavaev")
