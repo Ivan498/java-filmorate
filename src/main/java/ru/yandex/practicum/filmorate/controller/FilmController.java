@@ -1,22 +1,30 @@
 package ru.yandex.practicum.filmorate.controller;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private int idCount = 0;
-    private final Map<Integer, Film> filmMap = new HashMap<>();
+    FilmStorage filmStorage;
+    FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+        this.filmService = filmService;
+        this.filmStorage = filmStorage;
+    }
 
     LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
 
@@ -32,41 +40,48 @@ public class FilmController {
     @GetMapping
     public Collection<Film> getFilm() {
         log.info("Гет всех фильмов");
-        return filmMap.values();
+        return filmStorage.getFilm();
     }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        log.info("Получен запрос POST /film.");
+        log.info("Получен запрос POST /films.");
         log.info("Попытка добавить пользователя {}.", film);
 
         validateUserFields(film);
 
-        if (film.getId() == null || film.getId() == 0) {
-            idCount++;
-            film.setId(idCount);
-        }
-
-        filmMap.put(film.getId(), film);
-        log.info("Фильм добавлен");
-
-        return film;
+        return filmStorage.createFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        log.info("Получен запрос PUT /users.");
+        log.info("Получен запрос PUT /films.");
         log.info("Попытка добавить пользователя {}.", film);
 
         validateUserFields(film);
 
-        if (filmMap.containsKey(film.getId())) {
-            filmMap.put(film.getId(), film);
-            log.info("Film обновлен");
-        } else {
-            throw new ValidationException(HttpStatus.NOT_FOUND, "Такого id нет в фильмах");
-        }
-
-        return film;
-        }
+        return filmStorage.updateFilm(film);
     }
+
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Integer id) {
+        return filmStorage.findByIdFilm(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public Film addFilmPutsLike(@PathVariable Integer id, @PathVariable Long userId) {
+        log.info("Получен запрос PUT /films/{id}/like/{userId}.");
+        return filmService.addFilmPutsLike(id, userId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public void deleteFilmLike(@PathVariable Integer id, @PathVariable Long userId) {
+        log.info("Получен запрос DELETE /{id}/like/{userId}.");
+        filmService.deleteFilmLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularListFilms(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
+        return filmService.getPopularFilms(count);
+    }
+}
