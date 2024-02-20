@@ -107,14 +107,14 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.debug("Получен запрос PUT /users/{id}/friends/{friendId}.");
-        log.debug("Попытка добавить друга по id ", friendId ,"для пользователя по id ", id);
+        log.debug("Попытка добавить друга по id ", friendId, "для пользователя по id ", id);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.debug("Получен запрос DELETE /users/{id}/friends/{friendId}.");
-        log.debug("Попытка удалить друга по id ", friendId ,"для пользователя по id ", id);
+        log.debug("Попытка удалить друга по id ", friendId, "для пользователя по id ", id);
         userService.deleteFriend(id, friendId);
     }
 
@@ -128,7 +128,7 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getAllCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         log.debug("Получен запрос GET /users/{id}/friends/common/{otherId}.");
-        log.debug("Попытка показать общих друзей юзера по id ", id ,"и юзера по id ", otherId);
+        log.debug("Попытка показать общих друзей юзера по id ", id, "и юзера по id ", otherId);
         return userService.getAllCommonFriends(id, otherId);
     }
 }
