@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -40,12 +42,16 @@ public class FilmService {
             return film;
         }
 
-        return null;
+        throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
     }
 
     public void deleteFilmLike(Integer id, Long userId) {
         User user = userStorage.findByIdUser(userId);
         Film film = filmStorage.findByIdFilm(id);
+
+        if (user == null || film == null) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+        }
 
         if (user != null && film != null) {
             Set<Long> likes = film.getLike();
@@ -61,6 +67,10 @@ public class FilmService {
 
     public Collection<Film> getPopularFilms(Integer count) {
         Collection<Film> filmCollection = filmStorage.getFilm();
+
+        if (filmCollection == null) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+        }
 
         List<Film> popularFilms = filmCollection.stream()
                 .filter(film -> (film).getLike() != null)

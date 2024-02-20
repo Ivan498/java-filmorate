@@ -21,7 +21,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на не проверку пройден из-за даты")
-    public void userDateInValidTest() {
+    public void testUserDateInvalidRequest() {
         User user = User.builder()
                 .id(1L)
                 .email("mail@yandex.ru")
@@ -35,7 +35,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на проверку пройден, но поменялось name на login")
-    public void userNameLoginValidTest() {
+    public void testUserNameChangedLoginValidRequest() {
         User user = User.builder()
                 .id(1L)
                 .email("mail@yandex.ru")
@@ -50,7 +50,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на проверку пройден, но поменялось name на login")
-    public void userMainInValidTest() {
+    public void testUserMainChangedValidRequest() {
         User user = User.builder()
                 .id(1L)
                 .email("mailyandex.ru")
@@ -64,7 +64,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на проверку пройден, но мы вводим пользователя без id")
-    public void userWithoutIdTest() {
+    public void testUserWithoutIdRequest() {
         User user = User.builder()
                 .email("mail@yandex.ru")
                 .login("doloreUpdate")
@@ -77,7 +77,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на проверку не пройден из-за даты")
-    public void filmDateInValidTest() {
+    public void testFilmDateInvalidRequest() {
         Film film = Film.builder()
                 .id(1)
                 .name("Фильм")
@@ -91,7 +91,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на проверку не пройден из-за продолжительности фильма")
-    public void filmDurationInValidTest() {
+    public void testFilmDurationInvalidRequest() {
         Film film = Film.builder()
                 .id(1)
                 .name("Фильм")
@@ -105,7 +105,7 @@ class FilmorateApplicationTests {
 
     @Test
     @DisplayName(value = "Запрос на проверку пройден, но мы вводим пользователя без id")
-    public void filmWithoutIdTest() {
+    public void testFilmWithoutIdRequest() {
         Film film = Film.builder()
                 .name("Фильм")
                 .description("Описание")

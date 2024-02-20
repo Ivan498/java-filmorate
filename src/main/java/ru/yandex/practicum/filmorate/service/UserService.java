@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -21,6 +23,10 @@ public class UserService {
     public void addFriend(Long id, Long friendId) {
         User user = userStorage.findByIdUser(id);
         User userFriend = userStorage.findByIdUser(friendId);
+
+        if (user == null || userFriend == null) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+        }
 
         if (userFriend != null) {
             if (userFriend.getFriendsId() == null) {
@@ -48,6 +54,9 @@ public class UserService {
     public void deleteFriend(Long id, Long friendId) {
         User user = userStorage.findByIdUser(id);
 
+        if (user == null) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+        }
         if (user.getFriendsId() == null) {
             user.setFriendsId(new HashSet<>());
         }
@@ -61,6 +70,10 @@ public class UserService {
     public List<User> getAllFriendsUserId(Long id) {
         User user = userStorage.findByIdUser(id);
         Set<Long> friends = user.getFriendsId();
+
+        if (user == null) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+        }
 
         List<User> friendUsers = new ArrayList<>();
         for (Long friendId : friends) {
@@ -100,3 +113,4 @@ public class UserService {
         return commonFriends;
     }
 }
+
