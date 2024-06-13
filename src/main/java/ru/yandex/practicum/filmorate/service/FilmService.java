@@ -1,83 +1,113 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.FilmRepository;
+import ru.yandex.practicum.filmorate.storage.UserRepository;
 
+import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FilmService {
-    FilmStorage filmStorage;
-    UserStorage userStorage;
+    private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
+    LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository) {
+        this.filmRepository = filmRepository;
+        this.userRepository = userRepository;
     }
 
-    public Film addFilmPutsLike(Integer id, Long userId) {
-        User user = userStorage.findByIdUser(userId);
-        Film film = filmStorage.findByIdFilm(id);
+    public Collection<Film> getFilm() {
+        return filmRepository.findAll();
+    }
 
-        if (user != null && film != null) {
-            Set<Long> likes = film.getLike();
+    public Film createFilm(Film film) {
+        filmRepository.save(film);
+        return film;
+    }
+
+    public Film updateFilm(Film film) {
+        List<Film> filmList = filmRepository.findAll();
+        List<Integer> filmIdList = filmList.stream().map(Film::getId).collect(Collectors.toList());
+        if (!filmIdList.contains(film.getId())) {
+            throw new NotFoundException("Film not found");
+        }
+        filmRepository.save(film);
+        return film;
+    }
+
+    public Optional<Film> getFilmById(Integer id) {
+        return filmRepository.findById(id);
+    }
+
+    public Film addFilmPutsLike(Integer filmId, Integer userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Film> filmOptional = filmRepository.findById(filmId);
+
+        if (userOptional.isPresent() && filmOptional.isPresent()) {
+            User user = userOptional.get();
+            Film film = filmOptional.get();
+
+            Set<User> likes = film.getLikes();
             if (likes == null) {
                 likes = new HashSet<>();
             }
-            likes.add(user.getId());
-            film.setLike(likes);
+            likes.add(user);
+            film.setLikes(likes);
 
-            filmStorage.saveFilm(film);
-            log.info("Добавили лайк на фильм по id " + id);
+            filmRepository.save(film);
+            log.info("Добавлен лайк на фильм с id " + filmId);
             return film;
         }
 
-        throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+        throw new NotFoundException("Фильм или пользователь не найден");
     }
 
-    public void deleteFilmLike(Integer id, Long userId) {
-        User user = userStorage.findByIdUser(userId);
-        Film film = filmStorage.findByIdFilm(id);
-
-        if (user == null || film == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
-        }
-
-        if (user != null && film != null) {
-            Set<Long> likes = film.getLike();
+    public void deleteFilmLike(Integer id, Integer userId) {
+        Optional<Film> filmOptional = filmRepository.findById(id);
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent() && filmOptional.isPresent()) {
+            User user = userOptional.get();
+            Film film = filmOptional.get();
+            Set<User> likes = film.getLikes();
             if (likes == null) {
-                return;
+                likes = new HashSet<>();
             }
-            likes.remove(user.getId());
-            film.setLike(likes);
-            log.info("Удалили лайк на фильм по id " + id);
-            filmStorage.saveFilm(film);
+            likes.remove(user);
+            log.info("Удален лайк на фильм с id " + id);
+        }
+        else {
+            throw new NotFoundException("Фильм или пользователь не найден");
         }
     }
 
     public Collection<Film> getPopularFilms(Integer count) {
-        Collection<Film> filmCollection = filmStorage.getFilm();
+        Collection<Film> filmCollection = filmRepository.findAll();
 
         if (filmCollection == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+            throw new NotFoundException("Not found");
         }
 
         List<Film> popularFilms = filmCollection.stream()
-                .filter(film -> (film).getLike() != null)
-                .sorted(Comparator.comparingInt(film -> ((Film) film).getLike().size()).reversed())
+                .filter(film -> film.getLikes() != null)
+                .sorted(Comparator.comparingInt(film -> ((Film) film).getLikes().size()).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
         log.info("Показали популярные фильмы");
         return popularFilms;
     }
+
 }
+

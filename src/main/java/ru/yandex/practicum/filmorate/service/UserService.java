@@ -4,113 +4,104 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.UserRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
-    UserStorage userStorage;
+    UserRepository userRepository;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public void addFriend(Long id, Long friendId) {
-        User user = userStorage.findByIdUser(id);
-        User userFriend = userStorage.findByIdUser(friendId);
+    public Collection<User> getUser() {
+        return userRepository.findAll();
+    }
 
-        if (user == null || userFriend == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+    public User createUser(User user) {
+        userRepository.save(user);
+        return user;
+    }
+
+    public User updateUser(User user) {
+        User existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.save(user);
+        return user;
+    }
+
+    public Optional<User> findByIdUser(Integer id) {
+        return userRepository.findById(id);
+    }
+
+    public void addFriend(Integer id, Integer friendId) {
+        if (!userRepository.existsById(id) || !userRepository.existsById(friendId)) {
+            throw new NotFoundException("User or Friend not found");
         }
 
-        if (userFriend != null) {
-            if (userFriend.getFriendsId() == null) {
-                userFriend.setFriendsId(new HashSet<>());
-            }
-            Set<Long> friendsUser = new HashSet<>(userFriend.getFriendsId());
-            friendsUser.add(id);
-            log.info("Добавили для Юзера по id " + friendId + " друга по id " + id);
-            userFriend.setFriendsId(friendsUser);
-            userStorage.saveUser(userFriend); // Сохраняем обновленные данные userFriend
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new NotFoundException("Friend not found"));
 
-        if (user != null) {
-            if (user.getFriendsId() == null) {
-                user.setFriendsId(new HashSet<>());
-            }
-            Set<Long> friends = new HashSet<>(user.getFriendsId());
-            friends.add(friendId);
-            log.info("Добавили для Юзера по id " + id + " друга по id " + friendId);
-            user.setFriendsId(friends);
-            userStorage.saveUser(user); // Сохраняем обновленные данные user
+        List<User> userFriends = user.getFriends();
+        userFriends.add(friend);
+        userRepository.save(user);
+    }
+
+
+
+    public void deleteFriend(Integer id, Integer friendId) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new NotFoundException("Friend not found"));
+        List<User> userFriends = user.getFriends();
+        if (userFriends.contains(friend)) {
+            userFriends.remove(friend);
+            userRepository.save(user);
+            log.info("Deleted Friend: " + friend);
+        }
+        else {
+            log.info("Этот пользователь не является другом");
         }
     }
 
-    public void deleteFriend(Long id, Long friendId) {
-        User user = userStorage.findByIdUser(id);
+    public List<User> getAllFriendsByUserId(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (user == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
-        }
-        if (user.getFriendsId() == null) {
-            user.setFriendsId(new HashSet<>());
-        }
+        List<User> friends = user.getFriends();
 
-        Set<Long> friends = new HashSet<>(user.getFriendsId());
-        friends.remove(friendId);
-        log.info("Удалили для Юзера по id " + id + " друга по id " + friendId);
-        user.setFriendsId(friends);
-    }
-
-    public List<User> getAllFriendsUserId(Long id) {
-        User user = userStorage.findByIdUser(id);
-        Set<Long> friends = user.getFriendsId();
-
-        if (user == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
-        }
-
-        List<User> friendUsers = new ArrayList<>();
-        for (Long friendId : friends) {
-            User friendUser = userStorage.findByIdUser(friendId);
-            if (friendUser != null) {
-                friendUsers.add(friendUser);
-            }
-        }
         log.info("Показали всех друзей Юзера по id " + id);
-        return friendUsers;
+        return friends;
     }
 
-    public List<User> getAllCommonFriends(Long id, Long otherId) {
-        User user = userStorage.findByIdUser(id);
-        User otherUser = userStorage.findByIdUser(otherId);
+    public List<User> getAllCommonFriends(Integer id, Integer otherId) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        User otherUser = userRepository.findById(otherId)
+                .orElseThrow(() -> new NotFoundException("Other user not found"));
 
-        if (user == null || otherUser == null) {
-            return Collections.emptyList(); // возвращаем пустой список, если один из пользователей не найден
-        }
-        if (user.getFriendsId() == null || otherUser.getFriendsId() == null) {
-            return Collections.emptyList();
-        }
-        Set<Long> userFriendsId = user.getFriendsId();
-        Set<Long> otherUserFriendsId = otherUser.getFriendsId();
-        List<User> commonFriends = new ArrayList<>();
+        List<User> userFriends = user.getFriends();
+        List<User> otherUserFriends = otherUser.getFriends();
 
-        for (Long userId : userFriendsId) {
-            if (otherUserFriendsId.contains(userId)) {
-                User commonFriend = userStorage.findByIdUser(userId);
-                if (commonFriend != null) {
-                    commonFriends.add(commonFriend);
-                }
-            }
-        }
+        List<User> commonFriends = userFriends.stream()
+                .filter(otherUserFriends::contains)
+                .collect(Collectors.toList());
 
         log.info("Показали всех общих друзей Юзера по id " + id + " и " + otherId);
         return commonFriends;
     }
 }
+
 

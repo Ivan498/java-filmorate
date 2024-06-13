@@ -7,27 +7,27 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.UserRepository;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
     UserService userService;
-    UserStorage userStorage;
+    UserRepository userRepository;
 
     @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
+    public UserController(UserRepository userRepository, UserService userService) {
+        this.userRepository = userRepository;
         this.userService = userService;
     }
-
-    private int userIdCounter = 0;
 
     private void validateUserFields(User user) {
         String email = user.getEmail();
@@ -66,7 +66,7 @@ public class UserController {
     @GetMapping
     public Collection<User> getUser() {
         log.info("Гет всех юзеров");
-        return userStorage.getUser();
+        return userService.getUser();
     }
 
     @PostMapping
@@ -80,7 +80,7 @@ public class UserController {
 
         validateUserFields(user);
 
-        return userStorage.createUser(user);
+        return userService.createUser(user);
     }
 
     @PutMapping
@@ -94,39 +94,39 @@ public class UserController {
 
         validateUserFields(user);
 
-        return userStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
+    public Optional<User> getUserById(@PathVariable Integer id) {
         log.debug("Получен запрос GET /users/{id}.");
         log.debug("Попытка посмотреть пользователя по id ", id);
-        return userStorage.findByIdUser(id);
+        return userService.findByIdUser(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         log.debug("Получен запрос PUT /users/{id}/friends/{friendId}.");
         log.debug("Попытка добавить друга по id ", friendId, "для пользователя по id ", id);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         log.debug("Получен запрос DELETE /users/{id}/friends/{friendId}.");
         log.debug("Попытка удалить друга по id ", friendId, "для пользователя по id ", id);
         userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getAllFriends(@PathVariable Long id) {
+    public List<User> getAllFriends(@PathVariable Integer id) {
         log.debug("Получен запрос GET /users/{id}/friends.");
         log.debug("Попытка показать всех друзей по id юзера ", id);
-        return userService.getAllFriendsUserId(id);
+        return userService.getAllFriendsByUserId(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getAllCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+    public List<User> getAllCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         log.debug("Получен запрос GET /users/{id}/friends/common/{otherId}.");
         log.debug("Попытка показать общих друзей юзера по id ", id, "и юзера по id ", otherId);
         return userService.getAllCommonFriends(id, otherId);
