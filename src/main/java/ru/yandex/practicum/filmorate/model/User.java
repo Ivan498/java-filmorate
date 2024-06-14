@@ -3,30 +3,36 @@ package ru.yandex.practicum.filmorate.model;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+@Entity
 @Data
 @NoArgsConstructor
-@Entity
 @Table
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Email(message = "Email не корректен")
+    @NotEmpty
     private String email;
 
+    @NotNull
+    @Pattern(regexp = "^\\S*$", message = "Строка не должна содержать пробел")
     private String login;
 
     private String name;
 
+    @NotNull
+    @PastOrPresent
     private LocalDate birthday;
 
     @OneToMany

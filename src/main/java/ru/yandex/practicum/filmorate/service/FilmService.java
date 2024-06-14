@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -24,9 +23,19 @@ public class FilmService {
     private final UserRepository userRepository;
     LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
 
+    @Autowired
     public FilmService(FilmRepository filmRepository, UserRepository userRepository) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
+    }
+
+    public void validateUserFields(Film film) {
+        if (film.getReleaseDate().isBefore(earliestAllowedDate)) {
+            log.debug("Не пройдена валидация email: {}", film.getReleaseDate());
+
+            throw new ValidationException(
+                    "Параметр ReleaseDate не должна быть менбше даты 1895.12.28");
+        }
     }
 
     public Collection<Film> getFilm() {
@@ -34,11 +43,12 @@ public class FilmService {
     }
 
     public Film createFilm(Film film) {
-        filmRepository.save(film);
-        return film;
+        validateUserFields(film);
+        return filmRepository.save(film);
     }
 
     public Film updateFilm(Film film) {
+        validateUserFields(film);
         List<Film> filmList = filmRepository.findAll();
         List<Integer> filmIdList = filmList.stream().map(Film::getId).collect(Collectors.toList());
         if (!filmIdList.contains(film.getId())) {

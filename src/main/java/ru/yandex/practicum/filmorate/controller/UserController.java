@@ -1,11 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserRepository;
 
@@ -19,49 +23,9 @@ import java.util.Set;
 @RestController
 @RequestMapping("/users")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    UserService userService;
-    UserRepository userRepository;
-
-    @Autowired
-    public UserController(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
-
-    private void validateUserFields(User user) {
-        String email = user.getEmail();
-        String login = user.getLogin();
-        LocalDate birthday = user.getBirthday();
-
-        if (email == null || email.isBlank() || !email.contains("@")) {
-            log.debug("Не пройдена валидация email: {}", email);
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр email не должен быть пустым и должен содержать символ @");
-        }
-
-        if (login == null || login.isBlank() || !login.replaceAll("\\s", "").equals(login)) {
-            log.debug("Не пройдена валидация login: {}", login);
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр login не должен быть пустым и содержать пробелы");
-        }
-
-        if (birthday != null && birthday.isAfter(LocalDate.now())) {
-            log.debug("Не пройдена валидация birthday: {}", birthday);
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр birthday не должен быть в будущем");
-        }
-    }
-
-    private User replaceVoidNameByLogin(User user) {
-        if (user.getName().isEmpty() && user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        return user;
-    }
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> getUser() {
@@ -70,15 +34,9 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         log.debug("Получен запрос POST /users.");
         log.debug("Попытка добавить пользователя {}.", user);
-
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-        validateUserFields(user);
 
         return userService.createUser(user);
     }
@@ -87,12 +45,6 @@ public class UserController {
     public User updateUser(@Valid @RequestBody User user) {
         log.debug("Получен запрос PUT /users.");
         log.debug("Попытка добавить пользователя {}.", user);
-
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-        validateUserFields(user);
 
         return userService.updateUser(user);
     }

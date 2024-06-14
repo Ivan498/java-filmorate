@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -18,46 +21,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    FilmRepository filmRepository;
-    FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmRepository filmRepository, FilmService filmService) {
-        this.filmService = filmService;
-        this.filmRepository = filmRepository;
-    }
-
-    LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
-
-    public void validateUserFields(Film film) {
-        if (film.getReleaseDate().isBefore(earliestAllowedDate)) {
-            log.debug("Не пройдена валидация email: {}", film.getReleaseDate());
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр ReleaseDate не должна быть менбше даты 1895.12.28");
-        }
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.debug("Не пройдена валидация name: {}", film.getName());
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр name не должен быть пустым");
-        }
-
-        if (film.getDescription() != null && film.getDescription().length() > 200) {
-            log.debug("Не пройдена валидация description: {}", film.getDescription());
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр description должен содержать не более 200 символов");
-        }
-
-        if (film.getDuration() == null || film.getDuration() <= 0) {
-            log.debug("Не пройдена валидация duration: {}", film.getDuration());
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр duration должен быть положительным числом");
-        }
-    }
+    private final FilmService filmService;
 
     @GetMapping
     public Collection<Film> getFilm() {
@@ -70,8 +36,6 @@ public class FilmController {
         log.info("Получен запрос POST /films.");
         log.info("Попытка добавить фильм {}.", film);
 
-        validateUserFields(film);
-
         return filmService.createFilm(film);
     }
 
@@ -79,8 +43,6 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос PUT /films.");
         log.info("Попытка добавить фильм {}.", film);
-
-        validateUserFields(film);
 
         return filmService.updateFilm(film);
     }

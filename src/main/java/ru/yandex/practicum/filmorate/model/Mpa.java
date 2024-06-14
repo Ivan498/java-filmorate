@@ -16,16 +16,7 @@ import java.util.Set;
 public class Mpa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
     private Integer id;
 
     private String name;
-
-    @ManyToMany
-    @JoinTable(
-            name = "MPA_FILM",
-            joinColumns = @JoinColumn(name = "MPA_ID"),
-            inverseJoinColumns = @JoinColumn(name = "FILM_ID")
-    )
-    private Set<Film> films;
 }

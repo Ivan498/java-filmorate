@@ -23,12 +23,17 @@ public class Film {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull
+    @NotBlank
     private String name;
 
+    @Size(min = 1, max = 200,message = "Должно быть больше 1 и меньше 200")
     private String description;
 
+    @NotNull
     private LocalDate releaseDate;
 
+    @Min(value = 1,message = "Должно быть положительное число")
     private Integer duration;
 
     @ManyToMany(mappedBy = "likeFilms")
@@ -37,6 +42,6 @@ public class Film {
     @ManyToMany(mappedBy = "films")
     private Set<Genre> genres;
 
-    @ManyToMany(mappedBy = "films")
-    private Set<Mpa> mpas;
+    @ManyToOne
+    private Mpa mpa;
 }
