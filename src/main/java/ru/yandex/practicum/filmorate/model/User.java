@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.persistence.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -40,8 +39,8 @@ public class User {
 
     @ManyToMany
     @JoinTable(name = "LIKES",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "film_id")
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "film_id")
     )
     private Set<Film> likeFilms;
 }

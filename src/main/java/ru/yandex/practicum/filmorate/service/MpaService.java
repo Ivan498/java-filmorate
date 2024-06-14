@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaRepository;
 
@@ -30,7 +30,7 @@ public class MpaService {
         if (optionalMpa.isPresent()) {
             return optionalMpa.get();
         } else {
-            throw new NotFoundException("Mpa с ID " + id + " не найден");
+            throw new DataNotFoundException("Mpa с ID " + id + " не найден");
         }
     }
 }

@@ -1,15 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import javax.persistence.*;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-import java.util.Set;
 
-@NoArgsConstructor
 @Data
 @Entity
 @Table

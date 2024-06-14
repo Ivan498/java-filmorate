@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.exception;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
 
 
@@ -13,19 +12,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(DataNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException e) {
+    public ErrorResponse handleNotFoundException(DataNotFoundException e) {
         log.debug("Получен статус 404 NOT FOUND: {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ErrorResponse handleValidationException(MethodArgumentNotValidException ex) {
         log.error("Получен статус 400 BAD REQUEST: {}", ex.getMessage());
         return new ErrorResponse(ex.getMessage());
     }
@@ -37,9 +37,9 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler(MethodValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidationException e) {
+    public ErrorResponse handleValidationException(MethodValidationException e) {
         log.debug("Получен статус 400 BAD REQUEST: {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserRepository;
 
@@ -26,7 +26,6 @@ public class UserService {
         }
     }
 
-
     public Collection<User> getUser() {
         return userRepository.findAll();
     }
@@ -40,7 +39,7 @@ public class UserService {
     public User updateUser(User user) {
         replaceVoidNameByLogin(user);
         User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
         userRepository.save(user);
         return user;
     }
@@ -51,13 +50,13 @@ public class UserService {
 
     public void addFriend(Integer id, Integer friendId) {
         if (!userRepository.existsById(id) || !userRepository.existsById(friendId)) {
-            throw new NotFoundException("User or Friend not found");
+            throw new DataNotFoundException("User or Friend not found");
         }
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
         User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new NotFoundException("Friend not found"));
+                .orElseThrow(() -> new DataNotFoundException("Friend not found"));
 
         List<User> userFriends = user.getFriends();
         userFriends.add(friend);
@@ -65,26 +64,24 @@ public class UserService {
     }
 
 
-
     public void deleteFriend(Integer id, Integer friendId) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
         User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new NotFoundException("Friend not found"));
+                .orElseThrow(() -> new DataNotFoundException("Friend not found"));
         List<User> userFriends = user.getFriends();
         if (userFriends.contains(friend)) {
             userFriends.remove(friend);
             userRepository.save(user);
             log.info("Deleted Friend: " + friend);
-        }
-        else {
+        } else {
             log.info("Этот пользователь не является другом");
         }
     }
 
     public List<User> getAllFriendsByUserId(Integer id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
 
         List<User> friends = user.getFriends();
 
@@ -94,9 +91,9 @@ public class UserService {
 
     public List<User> getAllCommonFriends(Integer id, Integer otherId) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
         User otherUser = userRepository.findById(otherId)
-                .orElseThrow(() -> new NotFoundException("Other user not found"));
+                .orElseThrow(() -> new DataNotFoundException("Other user not found"));
 
         List<User> userFriends = user.getFriends();
         List<User> otherUserFriends = otherUser.getFriends();
