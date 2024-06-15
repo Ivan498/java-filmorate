@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.MpaRepository;
+import ru.yandex.practicum.filmorate.storage.JpaMpaRepository;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -14,23 +14,23 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class MpaService {
-    MpaRepository mpaRepository;
+    JpaMpaRepository jpaMpaRepository;
 
     @Autowired
-    public MpaService(MpaRepository mpaRepository) {
-        this.mpaRepository = mpaRepository;
+    public MpaService(JpaMpaRepository jpaMpaRepository) {
+        this.jpaMpaRepository = jpaMpaRepository;
     }
 
     public Collection<Mpa> getAllMpa() {
-        return mpaRepository.findAll();
+        return jpaMpaRepository.findAll();
     }
 
     public Mpa getMpaById(Integer id) {
-        Optional<Mpa> optionalMpa = mpaRepository.findById(id);
+        Optional<Mpa> optionalMpa = jpaMpaRepository.findById(id);
         if (optionalMpa.isPresent()) {
             return optionalMpa.get();
         } else {
-            throw new DataNotFoundException("Mpa с ID " + id + " не найден");
+            throw new NotFoundException("Mpa с ID " + id + " не найден");
         }
     }
 }

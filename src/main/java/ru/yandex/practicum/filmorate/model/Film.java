@@ -27,13 +27,13 @@ public class Film {
     @NotBlank
     private String name;
 
-    @Size(min = 1, max = 200, message = "Должно быть больше 1 и меньше 200")
+    @Size(min = 1, max = 200)
     private String description;
 
     @NotNull
     private LocalDate releaseDate;
 
-    @Min(value = 1, message = "Должно быть положительное число")
+    @Min(value = 1)
     private Integer duration;
 
     @ManyToMany(mappedBy = "likeFilms")

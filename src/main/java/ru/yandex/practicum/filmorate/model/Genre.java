@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table
 public class Genre {

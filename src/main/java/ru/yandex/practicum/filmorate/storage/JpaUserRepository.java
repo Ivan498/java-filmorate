@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 @Repository
-public interface FilmRepository extends JpaRepository<Film, Integer> {
+public interface JpaUserRepository extends JpaRepository<User, Integer> {
 }

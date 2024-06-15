@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler(DataNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(DataNotFoundException e) {
+    public ErrorResponse handleNotFoundException(NotFoundException e) {
         log.debug("Получен статус 404 NOT FOUND: {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
@@ -37,9 +37,9 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(MethodValidationException.class)
+    @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(MethodValidationException e) {
+    public ErrorResponse handleValidationException(ValidationException e) {
         log.debug("Получен статус 400 BAD REQUEST: {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }

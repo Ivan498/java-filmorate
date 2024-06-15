@@ -20,12 +20,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Email(message = "Email не корректен")
+    @Email()
     @NotEmpty
     private String email;
 
     @NotNull
-    @Pattern(regexp = "^\\S*$", message = "Строка не должна содержать пробел")
+    @Pattern(regexp = "^\\S*$")
     private String login;
 
     private String name;

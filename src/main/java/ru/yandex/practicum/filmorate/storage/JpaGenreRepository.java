@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 @Repository
-public interface GenreRepository extends JpaRepository<Genre, Integer> {
+public interface JpaGenreRepository extends JpaRepository<Genre, Integer> {
 }
