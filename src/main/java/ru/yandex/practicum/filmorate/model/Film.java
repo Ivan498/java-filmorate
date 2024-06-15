@@ -16,32 +16,39 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Data
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 @Entity
-@Table
+@Table(name = "FILM")
 public class Film {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Integer id;
 
     @NotBlank
+    @Column(name = "NAME")
     private String name;
 
     @Size(min = 1, max = 200, message = "Должно быть больше 1 и меньше 200")
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @NotNull
+    @Column(name = "RELEASE_DATE")
     private LocalDate releaseDate;
 
     @Min(value = 1, message = "Должно быть положительное число")
+    @Column(name = "DURATION")
     private Integer duration;
 
-    @ManyToMany(mappedBy = "likeFilms")
-    private Set<User> likes;
+    @OneToMany(mappedBy = "film", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<LikeFilm> likes;
 
-    @ManyToMany(mappedBy = "films")
-    private Set<Genre> genres;
+    @OneToMany(mappedBy = "film", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<GenreFilm> genres;
 
-    @ManyToOne
-    private Mpa mpa;
+    @OneToMany(mappedBy = "film", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<MpaFilm> mpa;
+
 }

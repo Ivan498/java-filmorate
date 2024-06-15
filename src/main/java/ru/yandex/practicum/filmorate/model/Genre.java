@@ -1,27 +1,35 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table
+@Table(name = "GENRE")
 public class Genre {
+
+    @Id
+    @Column(name = "FILM_ID")
+    private Integer filmId;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Integer id;
 
+    @Column(name = "NAME")
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "genre_films",
-            joinColumns = @JoinColumn(name = "genre_id"),
-            inverseJoinColumns = @JoinColumn(name = "film_id")
-    )
-    private Set<Film> films;
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @JoinColumns(value = {
+            @JoinColumn(name = "FILM_ID", referencedColumnName = "FILM_ID"),
+            @JoinColumn(name = "ID", referencedColumnName = "GENRE_ID")
+    })
+    @JsonBackReference
+    private GenreFilm genreFilm;
+
 }
