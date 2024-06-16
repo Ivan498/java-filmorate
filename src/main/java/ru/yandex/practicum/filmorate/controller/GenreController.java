@@ -16,10 +16,12 @@ import java.util.List;
 @RequestMapping("/genres")
 public class GenreController {
     private GenreService genreService;
+
     @Autowired
     public GenreController(GenreService genreService) {
         this.genreService = genreService;
     }
+
     @GetMapping
     public List<Genre> getAll() {
         log.info("Get all genres.");
