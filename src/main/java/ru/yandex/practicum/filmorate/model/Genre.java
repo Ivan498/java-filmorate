@@ -1,25 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-import javax.persistence.*;
-import java.util.Set;
+import javax.validation.constraints.NotBlank;
 
 @Data
-@Entity
-@Table
-public class Genre {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class Genre extends BaseUnit {
+    @NotBlank
     private String name;
-
-    @ManyToMany
-    @JoinTable(
-            name = "genre_films",
-            joinColumns = @JoinColumn(name = "genre_id"),
-            inverseJoinColumns = @JoinColumn(name = "film_id")
-    )
-    private Set<Film> films;
 }

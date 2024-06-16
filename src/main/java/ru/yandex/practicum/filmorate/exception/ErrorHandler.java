@@ -2,9 +2,8 @@ package ru.yandex.practicum.filmorate.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,13 +43,17 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(DataIntegrityViolationException e) {
-        ErrorResponse errorResponse = new ErrorResponse(e.getMessage());
-        if (e.getCause() instanceof ConstraintViolationException) {
-            log.debug("Получен статус 400 BAD REQUEST: {}", e.getMessage(), e);
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNotFoundException(ConstraintViolationException e) {
+        log.debug("Получен статус 404 NOT FOUND: {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(DataAccessException ex) {
+        log.error("Получен статус 400 BAD REQUEST: {}", ex.getMessage());
+        return new ErrorResponse(ex.getMessage());
     }
 }

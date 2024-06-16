@@ -3,118 +3,90 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.JpaFilmRepository;
-import ru.yandex.practicum.filmorate.storage.JpaUserRepository;
 
-import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.dao.GenresRepository;
+import ru.yandex.practicum.filmorate.dao.FilmRepository;
+import ru.yandex.practicum.filmorate.dao.LikeRepository;
+import ru.yandex.practicum.filmorate.dao.UserRepository;
 
 @Slf4j
 @Service
 public class FilmService {
-    private final JpaFilmRepository jpaFilmRepository;
-    private final JpaUserRepository jpaUserRepository;
-    LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
+    FilmRepository filmStorage;
+    GenresRepository genresRepository;
+    LikeRepository likeRepository;
+    UserRepository userStorage;
 
     @Autowired
-    public FilmService(JpaFilmRepository jpaFilmRepository, JpaUserRepository jpaUserRepository) {
-        this.jpaFilmRepository = jpaFilmRepository;
-        this.jpaUserRepository = jpaUserRepository;
+    public FilmService(@Qualifier("jdbcFilmRepository") FilmRepository filmStorage,
+                       GenresRepository genresRepository,
+                       LikeRepository likeRepository,
+                       @Qualifier("jdbcUserRepository") UserRepository userStorage) {
+        this.filmStorage = filmStorage;
+        this.genresRepository = genresRepository;
+        this.likeRepository = likeRepository;
+        this.userStorage = userStorage;
     }
 
-    public void validateUserFields(Film film) {
-        if (film.getReleaseDate().isBefore(earliestAllowedDate)) {
-            log.debug("Не пройдена валидация email: {}", film.getReleaseDate());
+    public void addLike(Long filmId, Long userId) {
+        userStorage.isExists(userId);
+        log.info("Добавлен лайк на фильм с id " + filmId);
+        likeRepository.addLike(filmId, userId);
+    }
 
-            throw new ValidationException(
-                    "Параметр ReleaseDate не должна быть менбше даты 1895.12.28");
+    public void deleteLike(Long filmId, Long userId) {
+        userStorage.isExists(userId);
+        log.info("Удален лайк на фильм с id " + filmId);
+        likeRepository.deleteLike(filmId, userId);
+    }
+
+    public List<Film> getPopularFilm(Integer count) {
+        return likeRepository.getPopular(count);
+    }
+
+    public Film createFilm(Film value) {
+        Film film = filmStorage.create(value);
+        if (value.getGenres().size() != 0) {
+            genresRepository.updateGenresForFilm(film, value.getGenres());
+            film.setGenres(genresRepository.getGenresForFilm(film.getId()));
         }
-    }
-
-    public Collection<Film> getFilm() {
-        return jpaFilmRepository.findAll();
-    }
-
-    public Film createFilm(Film film) {
-        validateUserFields(film);
-        return jpaFilmRepository.save(film);
-    }
-
-    public Film updateFilm(Film film) {
-        validateUserFields(film);
-        List<Film> filmList = jpaFilmRepository.findAll();
-        List<Integer> filmIdList = filmList.stream().map(Film::getId).collect(Collectors.toList());
-        if (!filmIdList.contains(film.getId())) {
-            throw new NotFoundException("Film not found");
-        }
-        jpaFilmRepository.save(film);
         return film;
     }
 
-    public Optional<Film> getFilmById(Integer id) {
-        return jpaFilmRepository.findById(id);
-    }
+    public Film updateFilm(Film value) {
+        Film film = filmStorage.update(value);
 
-    public Film addFilmPutsLike(Integer filmId, Integer userId) {
-        Optional<User> userOptional = jpaUserRepository.findById(userId);
-        Optional<Film> filmOptional = jpaFilmRepository.findById(filmId);
+        Set<Genre> genres = value.getGenres();
+        int genresSetSize = genres.size();
 
-        if (userOptional.isPresent() && filmOptional.isPresent()) {
-            User user = userOptional.get();
-            Film film = filmOptional.get();
-
-            Set<User> likes = film.getLikes();
-            if (likes == null) {
-                likes = new HashSet<>();
-            }
-            likes.add(user);
-            film.setLikes(likes);
-
-            jpaFilmRepository.save(film);
-            log.info("Добавлен лайк на фильм с id " + filmId);
-            return film;
+        genresRepository.updateGenresForFilm(film, genres);
+        if (genresSetSize != 0) {
+            film.setGenres(genresRepository.getGenresForFilm(film.getId()));
+        } else if (genresSetSize == 0) {
+            film.setGenres(new LinkedHashSet<>());
         }
-
-        throw new NotFoundException("Фильм или пользователь не найден");
+        return film;
     }
 
-    public void deleteFilmLike(Integer id, Integer userId) {
-        Optional<Film> filmOptional = jpaFilmRepository.findById(id);
-        Optional<User> userOptional = jpaUserRepository.findById(userId);
-        if (userOptional.isPresent() && filmOptional.isPresent()) {
-            User user = userOptional.get();
-            Film film = filmOptional.get();
-            Set<User> likes = film.getLikes();
-            if (likes == null) {
-                likes = new HashSet<>();
-            }
-            likes.remove(user);
-            log.info("Удален лайк на фильм с id " + id);
-        } else {
-            throw new NotFoundException("Фильм или пользователь не найден");
+    public List<Film> getAllFilm() {
+        List<Film> films = filmStorage.getAll();
+        List<Film> filmsWithGenres = new ArrayList<>();
+        for (Film film : films) {
+            Long id = film.getId();
+            film.setGenres(genresRepository.getGenresForFilm(id));
+            filmsWithGenres.add(film);
         }
+        return filmsWithGenres;
     }
 
-    public Collection<Film> getPopularFilms(Integer count) {
-        Collection<Film> filmCollection = jpaFilmRepository.findAll();
-
-        if (filmCollection == null) {
-            throw new NotFoundException("Not found");
-        }
-
-        List<Film> popularFilms = filmCollection.stream()
-                .filter(film -> film.getLikes() != null)
-                .sorted(Comparator.comparingInt(film -> ((Film) film).getLikes().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
-        log.info("Показали популярные фильмы");
-        return popularFilms;
+    public Film getFilmById(Long id) {
+        Film film = filmStorage.getData(id);
+        film.setGenres(genresRepository.getGenresForFilm(id));
+        return film;
     }
-
 }
-

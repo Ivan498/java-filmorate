@@ -1,17 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import javax.persistence.*;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+import javax.validation.constraints.NotBlank;
 
 @Data
-@Entity
-@Table
-public class Mpa {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor(force = true)
+public class Mpa extends BaseUnit {
+    @NotBlank
     private String name;
 }

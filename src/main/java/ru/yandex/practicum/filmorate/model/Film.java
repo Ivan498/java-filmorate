@@ -1,47 +1,35 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.*;
 
-/**
- * Film.
- */
-@AllArgsConstructor
-@Builder
 @Data
-@NoArgsConstructor(force = true)
-@Entity
-@Table
-public class Film {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class Film extends BaseUnit {
     @NotBlank
     private String name;
 
-    @Size(min = 1, max = 200)
+    @Size(max = 200)
     private String description;
 
     @NotNull
     private LocalDate releaseDate;
 
-    @Min(value = 1)
-    private Integer duration;
+    @Min(1)
+    private int duration;
 
-    @ManyToMany(mappedBy = "likeFilms")
-    private Set<User> likes;
+    private int rate;
 
-    @ManyToMany(mappedBy = "films")
-    private Set<Genre> genres;
+    private Mpa mpa = new Mpa();
 
-    @ManyToOne
-    private Mpa mpa;
+    private Set<Genre> genres = new LinkedHashSet<>();
 }

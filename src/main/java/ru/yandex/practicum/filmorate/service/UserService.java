@@ -1,110 +1,64 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.JpaUserRepository;
+import ru.yandex.practicum.filmorate.dao.FriendRepository;
+import ru.yandex.practicum.filmorate.dao.UserRepository;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
-@Slf4j
 public class UserService {
-    JpaUserRepository userRepository;
+    UserRepository userStorage;
+    FriendRepository friendRepository;
 
     @Autowired
-    public UserService(JpaUserRepository jpaUserRepository) {
-        this.userRepository = jpaUserRepository;
+    public UserService(@Qualifier("jdbcUserRepository") UserRepository userStorage, FriendRepository friendRepository) {
+        this.userStorage = userStorage;
+        this.friendRepository = friendRepository;
     }
 
-    private void replaceVoidNameByLogin(User user) {
-        if (user.getName().isEmpty() || user.getName() == null) {
-            user.setName(user.getLogin());
+    public void addFriend(Long userId, Long friendId) {
+        if (userStorage.isExists(userId) && userStorage.isExists(friendId)) {
+            friendRepository.addFriend(userId, friendId);
         }
     }
 
-    public Collection<User> getUser() {
-        return userRepository.findAll();
-    }
-
-    public User createUser(User user) {
-        replaceVoidNameByLogin(user);
-        userRepository.save(user);
-        return user;
-    }
-
-    public User updateUser(User user) {
-        replaceVoidNameByLogin(user);
-        User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        userRepository.save(user);
-        return user;
-    }
-
-    public Optional<User> findByIdUser(Integer id) {
-        return userRepository.findById(id);
-    }
-
-    public void addFriend(Integer id, Integer friendId) {
-        if (!userRepository.existsById(id) || !userRepository.existsById(friendId)) {
-            throw new NotFoundException("User or Friend not found");
-        }
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new NotFoundException("Friend not found"));
-
-        List<User> userFriends = user.getFriends();
-        userFriends.add(friend);
-        userRepository.save(user);
-    }
-
-
-    public void deleteFriend(Integer id, Integer friendId) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new NotFoundException("Friend not found"));
-        List<User> userFriends = user.getFriends();
-        if (userFriends.contains(friend)) {
-            userFriends.remove(friend);
-            userRepository.save(user);
-            log.info("Deleted Friend: " + friend);
-        } else {
-            log.info("Этот пользователь не является другом");
+    public void deleteFriend(Long userId, Long friendId) {
+        if (userStorage.isExists(userId) && userStorage.isExists(friendId)) {
+            friendRepository.deleteFriend(userId, friendId);
         }
     }
 
-    public List<User> getAllFriendsByUserId(Integer id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+    public List<User> getFriends(Long id) {
+        userStorage.isExists(id);
 
-        List<User> friends = user.getFriends();
-
-        log.info("Показали всех друзей Юзера по id " + id);
-        return friends;
+        return friendRepository.getFriends(id);
     }
 
-    public List<User> getAllCommonFriends(Integer id, Integer otherId) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        User otherUser = userRepository.findById(otherId)
-                .orElseThrow(() -> new NotFoundException("Other user not found"));
+    public List<User> getCommonFriends(Long userId, Long friendId) {
+        userStorage.isExists(userId);
+        userStorage.isExists(friendId);
 
-        List<User> userFriends = user.getFriends();
-        List<User> otherUserFriends = otherUser.getFriends();
+        return friendRepository.getCommonFriends(userId, friendId);
+    }
 
-        List<User> commonFriends = userFriends.stream()
-                .filter(otherUserFriends::contains)
-                .collect(Collectors.toList());
+    public User createUser(User value) {
+        return userStorage.create(value);
+    }
 
-        log.info("Показали всех общих друзей Юзера по id " + id + " и " + otherId);
-        return commonFriends;
+    public User updateUser(User value) {
+        return userStorage.update(value);
+    }
+
+    public List<User> getAllUser() {
+        return userStorage.getAll();
+    }
+
+    public User getUserById(Long id) {
+        return userStorage.getData(id);
     }
 }
-
 

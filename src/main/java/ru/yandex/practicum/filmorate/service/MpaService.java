@@ -1,36 +1,27 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.JpaMpaRepository;
+import ru.yandex.practicum.filmorate.dao.MpaRepository;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 @Service
-@Slf4j
 public class MpaService {
-    JpaMpaRepository jpaMpaRepository;
+    MpaRepository mpaStorage;
 
     @Autowired
-    public MpaService(JpaMpaRepository jpaMpaRepository) {
-        this.jpaMpaRepository = jpaMpaRepository;
+    public MpaService(MpaRepository mpaStorage) {
+        this.mpaStorage = mpaStorage;
     }
 
-    public Collection<Mpa> getAllMpa() {
-        return jpaMpaRepository.findAll();
+    public List<Mpa> getAll() {
+        return mpaStorage.getAll();
     }
 
-    public Mpa getMpaById(Integer id) {
-        Optional<Mpa> optionalMpa = jpaMpaRepository.findById(id);
-        if (optionalMpa.isPresent()) {
-            return optionalMpa.get();
-        } else {
-            throw new NotFoundException("Mpa с ID " + id + " не найден");
-        }
+    public Mpa getData(Long id) {
+        return mpaStorage.getData(id);
     }
 }

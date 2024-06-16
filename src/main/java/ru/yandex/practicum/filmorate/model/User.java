@@ -1,47 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
-import javax.persistence.*;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
 
-@Entity
 @Data
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @NoArgsConstructor
-@Table
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Email()
-    @NotEmpty
+public class User extends BaseUnit {
+    @NotBlank
+    @Email
     private String email;
 
-    @NotNull
-    @Pattern(regexp = "^\\S*$")
+    @NotBlank
     private String login;
 
     private String name;
 
-    @NotNull
     @PastOrPresent
     private LocalDate birthday;
-
-    @OneToMany
-    private List<User> friends;
-
-    @ManyToMany
-    @JoinTable(name = "LIKES",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "film_id")
-    )
-    private Set<Film> likeFilms;
 }
 
