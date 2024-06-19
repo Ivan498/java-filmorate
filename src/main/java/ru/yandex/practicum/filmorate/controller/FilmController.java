@@ -2,92 +2,70 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    FilmStorage filmStorage;
     FilmService filmService;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
-    LocalDate earliestAllowedDate = LocalDate.of(1895, 12, 28);
-
-    public void validateUserFields(Film film) {
-        if (film.getReleaseDate().isBefore(earliestAllowedDate)) {
-            log.debug("Не пройдена валидация email: {}", film.getReleaseDate());
-
-            throw new ValidationException(HttpStatus.BAD_REQUEST,
-                    "Параметр ReleaseDate не должна быть менбше даты 1895.12.28");
-        }
-    }
-
-    @GetMapping
-    public Collection<Film> getFilm() {
-        log.info("Гет всех фильмов");
-        return filmStorage.getFilm();
-    }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        log.info("Получен запрос POST /films.");
-        log.info("Попытка добавить фильм {}.", film);
-
-        validateUserFields(film);
-
-        return filmStorage.createFilm(film);
+        log.info("Гет всех фильмов");
+        return filmService.createFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос PUT /films.");
         log.info("Попытка добавить фильм {}.", film);
+        return filmService.updateFilm(film);
+    }
 
-        validateUserFields(film);
-
-        return filmStorage.updateFilm(film);
+    @GetMapping
+    public List<Film> getAllFilm() {
+        log.info("Получен запрос GET /films.");
+        log.info("Попытка показать фильм.");
+        return filmService.getAllFilm();
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable Integer id) {
+    public Film getFilmById(@PathVariable Long id) {
         log.info("Получен запрос GET /films/{id}.");
         log.info("Попытка посмотреть фильм по id ", id);
-        return filmStorage.findByIdFilm(id);
+        return filmService.getFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addFilmPutsLike(@PathVariable Integer id, @PathVariable Long userId) {
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен запрос PUT /films/{id}/like/{userId}.");
-        log.info("Попытка добавить лайка на фильм по id ", id);
-        return filmService.addFilmPutsLike(id, userId);
+        log.info("Попытка добавить лайк");
+        filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("{id}/like/{userId}")
-    public void deleteFilmLike(@PathVariable Integer id, @PathVariable Long userId) {
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен запрос DELETE /films/{id}/like/{userId}.");
-        log.info("Попытка удалить лайка на фильм по id ", id);
-        filmService.deleteFilmLike(id, userId);
+        log.info("Попытка удалить лайк");
+        filmService.deleteLike(id, userId);
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularListFilms(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        log.info("Получен запрос GET /films/popular?count={count}.");
-        log.info("Попытка посмотреть популярные фильмы в кол-ве ", count);
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilm(@RequestParam(defaultValue = "10") Integer count) {
+        log.info("Получен запрос GET /popular.");
+        log.info("Попытка получить популярные фильмы");
+        return filmService.getPopularFilm(count);
     }
 }

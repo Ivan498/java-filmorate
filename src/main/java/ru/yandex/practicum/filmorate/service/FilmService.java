@@ -2,82 +2,91 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.dao.GenresRepository;
+import ru.yandex.practicum.filmorate.dao.FilmRepository;
+import ru.yandex.practicum.filmorate.dao.LikeRepository;
+import ru.yandex.practicum.filmorate.dao.UserRepository;
 
 @Slf4j
 @Service
 public class FilmService {
-    FilmStorage filmStorage;
-    UserStorage userStorage;
+    FilmRepository filmStorage;
+    GenresRepository genresRepository;
+    LikeRepository likeRepository;
+    UserRepository userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("jdbcFilmRepository") FilmRepository filmStorage,
+                       GenresRepository genresRepository,
+                       LikeRepository likeRepository,
+                       @Qualifier("jdbcUserRepository") UserRepository userStorage) {
         this.filmStorage = filmStorage;
+        this.genresRepository = genresRepository;
+        this.likeRepository = likeRepository;
         this.userStorage = userStorage;
     }
 
-    public Film addFilmPutsLike(Integer id, Long userId) {
-        User user = userStorage.findByIdUser(userId);
-        Film film = filmStorage.findByIdFilm(id);
-
-        if (user != null && film != null) {
-            Set<Long> likes = film.getLike();
-            if (likes == null) {
-                likes = new HashSet<>();
-            }
-            likes.add(user.getId());
-            film.setLike(likes);
-
-            filmStorage.saveFilm(film);
-            log.info("Добавили лайк на фильм по id " + id);
-            return film;
-        }
-
-        throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+    public void addLike(Long filmId, Long userId) {
+        userStorage.isExists(userId);
+        log.info("Добавлен лайк на фильм с id " + filmId);
+        likeRepository.addLike(filmId, userId);
     }
 
-    public void deleteFilmLike(Integer id, Long userId) {
-        User user = userStorage.findByIdUser(userId);
-        Film film = filmStorage.findByIdFilm(id);
-
-        if (user == null || film == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
-        }
-
-        if (user != null && film != null) {
-            Set<Long> likes = film.getLike();
-            if (likes == null) {
-                return;
-            }
-            likes.remove(user.getId());
-            film.setLike(likes);
-            log.info("Удалили лайк на фильм по id " + id);
-            filmStorage.saveFilm(film);
-        }
+    public void deleteLike(Long filmId, Long userId) {
+        userStorage.isExists(userId);
+        log.info("Удален лайк на фильм с id " + filmId);
+        likeRepository.deleteLike(filmId, userId);
     }
 
-    public Collection<Film> getPopularFilms(Integer count) {
-        Collection<Film> filmCollection = filmStorage.getFilm();
+    public List<Film> getPopularFilm(Integer count) {
+        return likeRepository.getPopular(count);
+    }
 
-        if (filmCollection == null) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Not found");
+    public Film createFilm(Film value) {
+        Film film = filmStorage.create(value);
+        if (value.getGenres().size() != 0) {
+            genresRepository.updateGenresForFilm(film, value.getGenres());
+            film.setGenres(genresRepository.getGenresForFilm(film.getId()));
         }
+        return film;
+    }
 
-        List<Film> popularFilms = filmCollection.stream()
-                .filter(film -> (film).getLike() != null)
-                .sorted(Comparator.comparingInt(film -> ((Film) film).getLike().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
-        log.info("Показали популярные фильмы");
-        return popularFilms;
+    public Film updateFilm(Film value) {
+        Film film = filmStorage.update(value);
+
+        Set<Genre> genres = value.getGenres();
+        int genresSetSize = genres.size();
+
+        genresRepository.updateGenresForFilm(film, genres);
+        if (genresSetSize != 0) {
+            film.setGenres(genresRepository.getGenresForFilm(film.getId()));
+        } else if (genresSetSize == 0) {
+            film.setGenres(new LinkedHashSet<>());
+        }
+        return film;
+    }
+
+    public List<Film> getAllFilm() {
+        List<Film> films = filmStorage.getAll();
+        List<Film> filmsWithGenres = new ArrayList<>();
+        for (Film film : films) {
+            Long id = film.getId();
+            film.setGenres(genresRepository.getGenresForFilm(id));
+            filmsWithGenres.add(film);
+        }
+        return filmsWithGenres;
+    }
+
+    public Film getFilmById(Long id) {
+        Film film = filmStorage.getData(id);
+        film.setGenres(genresRepository.getGenresForFilm(id));
+        return film;
     }
 }
